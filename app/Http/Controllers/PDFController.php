@@ -39,7 +39,7 @@ class PDFController extends Controller
         file_put_contents($pdfPath, $pdf->output());
 
         // Send the email
-        Mail::send('emails.pdf', [], function ($message) use ($pdfPath, $request) {
+        $pdfRes = Mail::send('emails.pdf', [], function ($message) use ($pdfPath, $request) {
             $message->to($request->email)
                     ->subject('Your PDF with Images')
                     ->attach($pdfPath, [
@@ -47,6 +47,11 @@ class PDFController extends Controller
                         'mime' => 'application/pdf',
                     ]);
         });
+
+        $pdfRes = $pdfRes ? 'success' : 'failed';
+        if ($pdfRes === 'failed') {
+            return response()->json(['message' => 'Failed to send PDF!'], 500);
+        }
 
         // Delete the temporary PDF
         unlink($pdfPath);

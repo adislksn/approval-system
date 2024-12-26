@@ -23,6 +23,15 @@ class EditReports extends EditRecord
         ];
     }
 
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $user = User::find($data['user_id']);
+        $data['user_name'] = $user->name;
+        $data['email'] = $user->email;
+    
+        return $data;
+    }
+
     protected function afterSave(): void
     {
         // Get the status of the updated form (assuming 'status' is part of the form)

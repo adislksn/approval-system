@@ -13,6 +13,10 @@ Route::get('/', function () {
 Route::post('/send-pdf', [PDFController::class, 'uploadAndSendPDF'])->name('send-pdf');
 Route::get('/pdf', [PDFController::class, 'index'])->name('pdf');
 
+Route::get('/rancang', function () {
+    return view('pdf.images');
+});
+
 Route::get('/oauth/callback/google/test', function () {
     $google = Socialite::driver('google')->user();
     $user = User::updateOrCreate([
