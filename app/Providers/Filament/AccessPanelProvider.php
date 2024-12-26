@@ -21,6 +21,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use MarcoGermani87\FilamentCaptcha\FilamentCaptcha;
 
 class AccessPanelProvider extends PanelProvider
 {
@@ -80,7 +81,8 @@ class AccessPanelProvider extends PanelProvider
                 ->registration(true)
                 ->registration(fn (string $provider, SocialiteUserContract $oauthUser, ?Authenticatable $user) => (bool) $user)
                 ->userModelClass(\App\Models\User::class)
-                ->socialiteUserModelClass(\App\Models\SocialiteUser::class)
+                ->socialiteUserModelClass(\App\Models\SocialiteUser::class),
+                FilamentCaptcha::make()
             )
             ->authMiddleware([
                 Authenticate::class,

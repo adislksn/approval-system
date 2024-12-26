@@ -20,6 +20,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'role',
         'password',
     ];
 
@@ -46,8 +47,8 @@ class User extends Authenticatable
         ];
     }
 
-    // public function socialiteUsers()
-    // {
-    //     return $this->hasMany(SocialiteUser::class);
-    // }
+    public function reports()
+    {
+        return $this->hasMany(Report::class);
+    }
 }
