@@ -37,8 +37,5 @@ class EditReports extends EditRecord
         // Get the status of the updated form (assuming 'status' is part of the form)
         $data = $this->record;
         $user = User::find($data['user_id']);
-
-        // Send email based on the status
-        // Mail::to($user->email)->send(new PelaporanMail($data));
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\PDFController;
+use App\Models\Report;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -14,7 +15,8 @@ Route::post('/send-pdf', [PDFController::class, 'uploadAndSendPDF'])->name('send
 Route::get('/pdf', [PDFController::class, 'index'])->name('pdf');
 
 Route::get('/rancang', function () {
-    return view('pdf.images');
+    $images = Report::first()->images;
+    return view('pdf.images', compact('images'));
 });
 
 Route::get('/oauth/callback/google/test', function () {

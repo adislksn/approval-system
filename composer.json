@@ -11,6 +11,7 @@
         "barryvdh/laravel-snappy": "^1.0",
         "dutchcodingcompany/filament-socialite": "^2.3",
         "filament/filament": "^3.2",
+        "intervention/image": "^3.10",
         "laravel/framework": "^11.31",
         "laravel/tinker": "^2.9",
         "marcogermani87/filament-captcha": "^1.2",

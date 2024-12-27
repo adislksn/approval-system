@@ -4,7 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReportsResource\Pages;
 use App\Filament\Resources\ReportsResource\RelationManagers;
+use App\Helpers\MailHelpers;
 use App\Models\Report;
+use App\Models\User;
 use Dompdf\FrameDecorator\Text;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
@@ -28,6 +30,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class ReportsResource extends Resource
 {
@@ -138,7 +141,10 @@ class ReportsResource extends Resource
                         'rejected' => 'Rejected',
                     ])
                     ->afterStateUpdated(function ($record, $state) {
-                        // Runs after the state is saved to the database.
+                        if ($state === 'accepted') {
+                            $user = User::find($record->user_id);
+                            MailHelpers::sendPDF($record->images, $user, $record->toArray());
+                        }
                     })
                     ->sortable(),
                 ImageColumn::make('images')
