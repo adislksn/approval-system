@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\ReportsResource\Widgets\ReportsOverview;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use Laravel\Socialite\Contracts\User as SocialiteUserContract;
 use DutchCodingCompany\FilamentSocialite\Provider;
@@ -45,8 +47,7 @@ class AccessPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
-                Widgets\FilamentInfoWidget::class,
+                ReportsOverview::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -59,6 +60,9 @@ class AccessPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
             ])
+            ->plugin(
+                FilamentShieldPlugin::make()
+            )
             ->plugin(
                 FilamentSocialitePlugin::make()
                     // (required) Add providers corresponding with providers in `config/services.php`. 

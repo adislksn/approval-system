@@ -6,6 +6,7 @@ use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Illuminate\Contracts\Pagination\Paginator;
 use Filament\Forms\Form;
@@ -36,6 +37,11 @@ class UserResource extends Resource
                     ->label('Password')
                     ->required()
                     ->password(),
+                Select::make('roles')
+                    ->multiple()
+                    ->preload()
+                    ->searchable()
+                    ->relationship('roles', 'name')
             ]);
     }
 
