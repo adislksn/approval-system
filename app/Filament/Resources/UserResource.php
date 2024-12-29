@@ -52,7 +52,11 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('email')->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('email_verified_at')->sortable(),
-                Tables\Columns\TextColumn::make('created_at'),
+                Tables\Columns\TextColumn::make('roles.name')->badge()->color(fn (string $state): string => match ($state) {
+                    'super_admin' => 'success',
+                    'user' => 'warning',
+                    default => 'gray',
+                })->label('Role')->searchable()->sortable(),
             ])
             ->filters([
                 //

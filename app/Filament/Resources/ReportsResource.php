@@ -21,6 +21,7 @@ use Filament\Resources\Resource;
 use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -116,6 +117,7 @@ class ReportsResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->query(self::getFilteredQuery())
             ->columns([
                 TextColumn::make('user.name')
                     ->label('User')
@@ -140,12 +142,14 @@ class ReportsResource extends Resource
                         'accepted' => 'Accepted',
                         'rejected' => 'Rejected',
                     ])
+                    ->disabled(!(Auth::user()->hasRole('super_admin')))
                     ->afterStateUpdated(function ($record, $state) {
                         if ($state === 'accepted') {
                             $user = User::find($record->user_id);
                             MailHelpers::sendPDF($record->images, $user, $record->toArray());
                         }
                     })
+                    ->selectablePlaceholder(false)
                     ->sortable(),
                 ImageColumn::make('images')
                     ->stacked()
@@ -162,6 +166,14 @@ class ReportsResource extends Resource
                     ->requiresConfirmation()
                     ->action(fn (Collection $records) => $records->each->delete())
                 ]);
+    }
+
+    protected static function getFilteredQuery(): Builder
+    {
+        return Report::query()
+            ->when(! (Auth::user()->hasRole('super_admin')), function ($query) {
+                $query->where('user_id', Auth::id());
+            });
     }
 
     public static function getRelations(): array
