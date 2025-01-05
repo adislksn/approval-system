@@ -50,7 +50,7 @@ class MailHelpers
         // }
 
         // Delete the temporary PDF
-        // unlink($pdfPath);
+        unlink($pdfPath);
 
         return response()->json(['message' => 'PDF sent successfully!']);
     }

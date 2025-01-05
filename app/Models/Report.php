@@ -13,6 +13,7 @@ class Report extends Model
         'uuid',
         'nopol',
         'tahun',
+        'merk',
         'shipping_type',
         'kilometer',
         'description_service',

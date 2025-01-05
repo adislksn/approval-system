@@ -17,6 +17,7 @@ return new class extends Migration
             $table->uuid('uuid')->unique();
             $table->string('nopol')->nullable();
             $table->integer('tahun')->nullable();
+            $table->enum('merk', ['Izuzu', 'Daihatsu', 'TATA', 'Mitsubishi', 'Hino',  'none'])->default('none');
             $table->enum('shipping_type', ['4A', '4B', '4G', '4R', 'GD', '6R', '6H', 'WR', 'none'])->default('none');
             $table->float('kilometer')->nullable();
             $table->json('description_service')->nullable();

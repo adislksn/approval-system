@@ -81,11 +81,18 @@ class AccessPanelProvider extends PanelProvider
                             ])
                             ->with(['...']),
                     ])
-                ->slug('access')
-                ->registration(true)
-                ->registration(fn (string $provider, SocialiteUserContract $oauthUser, ?Authenticatable $user) => (bool) $user)
-                ->userModelClass(\App\Models\User::class)
-                ->socialiteUserModelClass(\App\Models\SocialiteUser::class),
+                    ->createUserUsing(function (string $provider, SocialiteUserContract $oauthUser, FilamentSocialitePlugin $plugin) {
+                        dd($provider, $oauthUser, $plugin);
+                    })
+                    ->resolveUserUsing(function (string $provider, SocialiteUserContract $oauthUser, FilamentSocialitePlugin $plugin) {
+                        dd($provider, $oauthUser, $plugin);
+                    })
+                    ->slug('access')
+                    ->registration(true)
+                    // ->registration(fn (string $provider, SocialiteUserContract $oauthUser, ?Authenticatable $user) => (bool) $user)
+                    ->userModelClass(\App\Models\User::class)
+            )
+            ->plugin(
                 FilamentCaptcha::make()
             )
             ->authMiddleware([
