@@ -24,7 +24,7 @@ return new class extends Migration
             $table->text('service_location')->nullable();
             $table->integer('estimation_cost')->nullable();
             $table->json('images')->nullable();
-            $table->enum('status', ['pending', 'accepted', 'rejected'])->default('pending');
+            $table->enum('status', ['pending', 'accepted 1', 'accepted 2', 'done', 'rejected'])->default('pending');
             $table->timestamps();
         });
     }

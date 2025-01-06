@@ -7,11 +7,13 @@ use App\Filament\Resources\ReportsResource\RelationManagers;
 use App\Helpers\MailHelpers;
 use App\Models\Report;
 use App\Models\User;
+use App\Models\UserApproval;
 use Dompdf\FrameDecorator\Text;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Group;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -43,20 +45,26 @@ class ReportsResource extends Resource
     {
         return $form
             ->schema([
+                TextInput::make('user_id')
+                    ->label('User ID')
+                    ->hidden()
+                    ->default(Auth::id()),
+                Group::make([
+                    TextInput::make('name')
+                        ->label('User Name')
+                        ->disabled()
+                        ->default(Auth::user()->name)
+                        ->dehydrateStateUsing(null),
+                    TextInput::make('email')
+                        ->label('Email')
+                        ->disabled()
+                        ->default(Auth::user()->email)
+                        ->dehydrateStateUsing(null),
+                ])
+                ->columnSpanFull()
+                ->relationship('user'),
                 Fieldset::make('')
                     ->schema([
-                        TextInput::make('user_id')
-                            ->label('User ID')
-                            ->hidden()
-                            ->default(fn () => Auth::id()),
-                        TextInput::make('user_name')
-                            ->label('User Name')
-                            ->disabled()
-                            ->default(fn () => Auth::user()->name),
-                        TextInput::make('email')
-                            ->label('Email')
-                            ->disabled()
-                            ->default(fn () => Auth::user()->email),
                         TextInput::make('nopol')
                             ->label('Nomor Polisi')
                             ->required(),
@@ -66,6 +74,18 @@ class ReportsResource extends Resource
                             ->minValue(1930)
                             ->maxValue(date('Y'))
                             ->default(date('Y'))
+                            ->required(),
+                        Select::make('merk')
+                            ->label('Merk')
+                            ->options([
+                                'Izuzu' => 'Izuzu',
+                                'Daihatsu' => 'Daihatsu',
+                                'TATA' => 'TATA',
+                                'Mitsubishi' => 'Mitsubishi',
+                                'Hino' => 'Hino',
+                                'none' => 'None',
+                            ])
+                            ->default('none')
                             ->required(),
                         Select::make('shipping_type')
                             ->label('Shipping Type')
@@ -86,9 +106,6 @@ class ReportsResource extends Resource
                             ->label('Kilometer')
                             ->numeric()
                             ->required(),
-                        Textarea::make('service_location')
-                            ->label('Lokasi Service')
-                            ->required(),
                         TextInput::make('estimation_cost')
                             ->label('Estimasi Biaya')
                             ->mask(RawJs::make('$money($input)'))
@@ -96,6 +113,13 @@ class ReportsResource extends Resource
                             ->prefix('Rp. ')
                             ->numeric()
                             ->required(),
+                        Textarea::make('service_location')
+                            ->label('Lokasi Service')
+                            ->columnSpanFull()
+                            ->required(),
+                    ]),
+                Fieldset::make('')
+                    ->schema([
                         Repeater::make('description_service')
                             ->label('Deskripsi Service')
                             ->addActionLabel('Tambah Deskripsi Service')
@@ -119,12 +143,65 @@ class ReportsResource extends Resource
         return $table
             ->query(self::getFilteredQuery())
             ->columns([
-                TextColumn::make('user.name')
-                    ->label('User')
-                    ->sortable(),
                 TextColumn::make('nopol')
                     ->label('Nomor Polisi')
                     ->searchable()
+                    ->sortable(),
+                SelectColumn::make('status')
+                    ->label('Status')
+                    ->options(function ($record) {
+                        $user = Auth::user();
+                        $data = UserApproval::with('user')->get();
+                        // dd($user->userApproval?->id);
+                        if ((($user->hasRole('approver') && $user->userApproval?->id == 1) || $user->hasRole('super_admin')) && ($record->status === 'pending' || $record->status === 'rejected')) {
+                            return [
+                                'pending' => 'Pending',
+                                'accepted 1' => 'Accepted by ' . $data[0]->user->name,
+                                'rejected' => 'Rejected',
+                            ];
+                        } else if ((($user->hasRole('approver') && $user->userApproval?->id == 2) || $user->hasRole('super_admin')) && $record->status == 'accepted 1') {
+                            return [
+                                'accepted 1' => 'Accepted by ' . $data[0]->user->name,
+                                'accepted 2' => 'Accepted by ' . $data[1]->user->name,
+                                'rejected' => 'Rejected',
+                            ];
+                        } else if ((($user->hasRole('approver') && $user->userApproval?->id == 3) || $user->hasRole('super_admin')) && $record->status == 'accepted 2') {
+                            return [
+                                'accepted 2' => 'Accepted by ' . $data[1]->user->name,
+                                'done' => 'Approved',
+                                'rejected' => 'Rejected',
+                            ];
+                        } else {
+                            if ($record->status === 'accepted 1') {
+                                return [
+                                    'accepted 1' => 'Accepted by ' . $data[0]->user->name,
+                                ];
+                            } else if ($record->status === 'accepted 2') {
+                                return [
+                                    'accepted 2' => 'Accepted by ' . $data[1]->user->name,
+                                ];
+                            } else if ($record->status === 'done') {
+                                return [
+                                    'done' => 'Approved',
+                                ];
+                            } else {
+                                return [
+                                    $record->status => $record->status,
+                                ];
+                            }
+                        }
+                    })
+                    ->disabled(!(Auth::user()->hasRole('super_admin') || Auth::user()->hasRole('approver')))
+                    ->afterStateUpdated(function ($record, $state) {
+                        if ($state === 'done') {
+                            $user = User::find($record->user_id);
+                            MailHelpers::sendPDF($record->images, $user, $record->toArray());
+                        }
+                    })
+                    ->selectablePlaceholder(false)
+                    ->sortable(),
+                TextColumn::make('user.name')
+                    ->label('User')
                     ->sortable(),
                 TextColumn::make('estimation_cost')
                     ->label('Estimasi Biaya')
@@ -135,22 +212,6 @@ class ReportsResource extends Resource
                     ->label('Dibuat Pada')
                     ->searchable()
                     ->sortable(),
-                SelectColumn::make('status')
-                    ->label('Status')
-                    ->options([
-                        'pending' => 'Pending',
-                        'accepted' => 'Accepted',
-                        'rejected' => 'Rejected',
-                    ])
-                    ->disabled(!(Auth::user()->hasRole('super_admin')))
-                    ->afterStateUpdated(function ($record, $state) {
-                        if ($state === 'accepted') {
-                            $user = User::find($record->user_id);
-                            MailHelpers::sendPDF($record->images, $user, $record->toArray());
-                        }
-                    })
-                    ->selectablePlaceholder(false)
-                    ->sortable(),
                 ImageColumn::make('images')
                     ->stacked()
                     ->circular()
@@ -159,7 +220,10 @@ class ReportsResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make()
+                ->hiddenLabel(),
+                Tables\Actions\EditAction::make()
+                ->hiddenLabel(),
             ], position: ActionsPosition::BeforeColumns)
             ->bulkActions([
                 BulkAction::make('delete')
@@ -171,7 +235,7 @@ class ReportsResource extends Resource
     protected static function getFilteredQuery(): Builder
     {
         return Report::query()
-            ->when(! (Auth::user()->hasRole('super_admin')), function ($query) {
+            ->when(! (Auth::user()->hasRole('super_admin') || Auth::user()->hasRole('approver')), function ($query) {
                 $query->where('user_id', Auth::id());
             });
     }

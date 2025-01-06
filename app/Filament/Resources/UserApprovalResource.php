@@ -6,9 +6,13 @@ use App\Filament\Resources\UserApprovalResource\Pages;
 use App\Filament\Resources\UserApprovalResource\RelationManagers;
 use App\Models\UserApproval;
 use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -23,15 +27,27 @@ class UserApprovalResource extends Resource
     {
         return $form
             ->schema([
-                //
+                Select::make('user_id')
+                    ->preload()
+                    ->searchable()
+                    ->relationship('user', 'name'),
+                FileUpload::make('ttd_path')
+                    ->image()
+                    ->imageEditor(),
             ]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
+            ->paginated(false)
             ->columns([
-                //
+                TextColumn::make('user.name')
+                    ->label('User')
+                    ->sortable(),
+                ImageColumn::make('ttd_path')
+                    ->stacked()
+                    ->circular()
             ])
             ->filters([
                 //
@@ -40,9 +56,7 @@ class UserApprovalResource extends Resource
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                //
             ]);
     }
 
@@ -57,7 +71,7 @@ class UserApprovalResource extends Resource
     {
         return [
             'index' => Pages\ListUserApprovals::route('/'),
-            'create' => Pages\CreateUserApproval::route('/create'),
+            // 'create' => Pages\CreateUserApproval::route('/create'),
             'edit' => Pages\EditUserApproval::route('/{record}/edit'),
         ];
     }
