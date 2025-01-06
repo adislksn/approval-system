@@ -8,9 +8,6 @@ use App\Helpers\MailHelpers;
 use App\Models\Report;
 use App\Models\User;
 use App\Models\UserApproval;
-use Dompdf\FrameDecorator\Text;
-use Filament\Forms;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
@@ -23,7 +20,6 @@ use Filament\Resources\Resource;
 use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -152,43 +148,63 @@ class ReportsResource extends Resource
                     ->options(function ($record) {
                         $user = Auth::user();
                         $data = UserApproval::with('user')->get();
-                        // dd($user->userApproval?->id);
-                        if ((($user->hasRole('approver') && $user->userApproval?->id == 1) || $user->hasRole('super_admin')) && ($record->status === 'pending' || $record->status === 'rejected')) {
-                            return [
-                                'pending' => 'Pending',
-                                'accepted 1' => 'Accepted by ' . $data[0]->user->name,
-                                'rejected' => 'Rejected',
-                            ];
-                        } else if ((($user->hasRole('approver') && $user->userApproval?->id == 2) || $user->hasRole('super_admin')) && $record->status == 'accepted 1') {
-                            return [
-                                'accepted 1' => 'Accepted by ' . $data[0]->user->name,
-                                'accepted 2' => 'Accepted by ' . $data[1]->user->name,
-                                'rejected' => 'Rejected',
-                            ];
-                        } else if ((($user->hasRole('approver') && $user->userApproval?->id == 3) || $user->hasRole('super_admin')) && $record->status == 'accepted 2') {
-                            return [
-                                'accepted 2' => 'Accepted by ' . $data[1]->user->name,
-                                'done' => 'Approved',
-                                'rejected' => 'Rejected',
-                            ];
-                        } else {
-                            if ($record->status === 'accepted 1') {
+
+                        $statusMap = [
+                            'pending' => [
+                                'roles' => ['approver', 'super_admin'],
+                                'id' => 1,
+                                'transitions' => [
+                                    'pending' => 'Pending',
+                                    'accepted 1' => 'Accepted by ' . $data[0]->user->name,
+                                    'rejected' => 'Rejected',
+                                ],
+                            ],
+                            'accepted 1' => [
+                                'roles' => ['approver', 'super_admin'],
+                                'id' => 2,
+                                'transitions' => [
+                                    'accepted 1' => 'Accepted by ' . $data[0]->user->name,
+                                    'accepted 2' => 'Accepted by ' . $data[1]->user->name,
+                                    'rejected' => 'Rejected',
+                                ],
+                            ],
+                            'accepted 2' => [
+                                'roles' => ['approver', 'super_admin'],
+                                'id' => 3,
+                                'transitions' => [
+                                    'accepted 2' => 'Accepted by ' . $data[1]->user->name,
+                                    'done' => 'Approved',
+                                    'rejected' => 'Rejected',
+                                ],
+                            ],
+                        ];
+
+                        $recordStatus = $record->status;
+
+                        foreach ($statusMap as $key => $settings) {
+                            if ((($user->hasRole($settings['roles'][0]) && $user->userApproval?->id == $settings['id']) || $user->hasRole($settings['roles'][1])) && $recordStatus === $key) {
+                                return $settings['transitions'];
+                            }
+                        }
+
+                        // Default status handling
+                        switch ($recordStatus) {
+                            case 'accepted 1':
                                 return [
                                     'accepted 1' => 'Accepted by ' . $data[0]->user->name,
                                 ];
-                            } else if ($record->status === 'accepted 2') {
+                            case 'accepted 2':
                                 return [
                                     'accepted 2' => 'Accepted by ' . $data[1]->user->name,
                                 ];
-                            } else if ($record->status === 'done') {
+                            case 'done':
                                 return [
                                     'done' => 'Approved',
                                 ];
-                            } else {
+                            default:
                                 return [
-                                    $record->status => $record->status,
+                                    $recordStatus => $recordStatus,
                                 ];
-                            }
                         }
                     })
                     ->disabled(!(Auth::user()->hasRole('super_admin') || Auth::user()->hasRole('approver')))
@@ -223,6 +239,7 @@ class ReportsResource extends Resource
                 Tables\Actions\ViewAction::make()
                 ->hiddenLabel(),
                 Tables\Actions\EditAction::make()
+                ->hidden(fn ($record) => !(in_array($record->status, ['pending', 'rejected'])))
                 ->hiddenLabel(),
             ], position: ActionsPosition::BeforeColumns)
             ->bulkActions([
