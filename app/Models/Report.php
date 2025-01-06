@@ -18,7 +18,6 @@ class Report extends Model
         'kilometer',
         'description_service',
         'service_location',
-        'estimation_cost',
         'images',
     ];
 

@@ -96,13 +96,6 @@
                     {{ $data['kilometer'] ?? '' }}
                 </td>
             </tr>
-            <tr>
-                <td style="width: 30%;">Estimasi Biaya</td>
-                <td style="width: 5%;">:</td>
-                <td style="width: 65%;">
-                    {{ $data['estimation_cost'] ?? '' }}
-                </td>
-            </tr>
         </table>
     </section>
 </body>

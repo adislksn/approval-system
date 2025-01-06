@@ -4,10 +4,11 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReportsResource\Pages;
 use App\Filament\Resources\ReportsResource\RelationManagers;
-use App\Helpers\MailHelpers;
+use App\Jobs\MailerJob;
 use App\Models\Report;
 use App\Models\User;
 use App\Models\UserApproval;
+use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Group;
@@ -17,25 +18,26 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Support\RawJs;
 use Filament\Tables;
 use Filament\Tables\Actions\BulkAction;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\SelectColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\ActionsPosition;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Mail;
 
 class ReportsResource extends Resource
 {
     protected static ?string $model = Report::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     public static function form(Form $form): Form
     {
@@ -102,16 +104,8 @@ class ReportsResource extends Resource
                             ->label('Kilometer')
                             ->numeric()
                             ->required(),
-                        TextInput::make('estimation_cost')
-                            ->label('Estimasi Biaya')
-                            ->mask(RawJs::make('$money($input)'))
-                            ->stripCharacters(',')
-                            ->prefix('Rp. ')
-                            ->numeric()
-                            ->required(),
                         Textarea::make('service_location')
                             ->label('Lokasi Service')
-                            ->columnSpanFull()
                             ->required(),
                     ]),
                 Fieldset::make('')
@@ -163,8 +157,8 @@ class ReportsResource extends Resource
                                 'roles' => ['approver', 'super_admin'],
                                 'id' => 2,
                                 'transitions' => [
-                                    'accepted 1' => 'Accepted by ' . $data[0]->user->name,
                                     'accepted 2' => 'Accepted by ' . $data[1]->user->name,
+                                    'accepted 1' => 'Accepted by ' . $data[0]->user->name,
                                     'rejected' => 'Rejected',
                                 ],
                             ],
@@ -173,7 +167,7 @@ class ReportsResource extends Resource
                                 'id' => 3,
                                 'transitions' => [
                                     'accepted 2' => 'Accepted by ' . $data[1]->user->name,
-                                    'done' => 'Approved',
+                                    'done' => 'Accepted',
                                     'rejected' => 'Rejected',
                                 ],
                             ],
@@ -199,7 +193,7 @@ class ReportsResource extends Resource
                                 ];
                             case 'done':
                                 return [
-                                    'done' => 'Approved',
+                                    'done' => 'Accepted',
                                 ];
                             default:
                                 return [
@@ -211,18 +205,15 @@ class ReportsResource extends Resource
                     ->afterStateUpdated(function ($record, $state) {
                         if ($state === 'done') {
                             $user = User::find($record->user_id);
-                            MailHelpers::sendPDF($record->images, $user, $record->toArray());
+                            // MailHelpers::sendPDF($record->images, $user, $record->toArray());
+                            MailerJob::dispatch($record->images, $user, $record->toArray());
                         }
                     })
                     ->selectablePlaceholder(false)
+                    ->searchable()
                     ->sortable(),
                 TextColumn::make('user.name')
                     ->label('User')
-                    ->sortable(),
-                TextColumn::make('estimation_cost')
-                    ->label('Estimasi Biaya')
-                    ->money('IDR', divideBy: 1000)
-                    ->searchable()
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
@@ -232,9 +223,36 @@ class ReportsResource extends Resource
                     ->stacked()
                     ->circular()
             ])
-            ->filters([
-                //
-            ])
+            ->defaultSort('created_at', 'desc')
+            ->filters(
+                [
+                SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'pending' => 'Pending',
+                        'accepted 1' => 'Accepted by ' . UserApproval::find(1)->user->name,
+                        'accepted 2' => 'Accepted by ' . UserApproval::find(2)->user->name,
+                        'done' => 'Accepted',
+                        'rejected' => 'Rejected',
+                    ]),
+                Filter::make('created_at')
+                    ->form([
+                        DatePicker::make('created_from'),
+                        DatePicker::make('created_until'),
+                    ])
+                    ->columns(2)
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['created_from'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                            )
+                            ->when(
+                                $data['created_until'],
+                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                            );
+                    })
+            ], layout: FiltersLayout::AboveContent)
             ->actions([
                 Tables\Actions\ViewAction::make()
                 ->hiddenLabel(),
@@ -246,7 +264,7 @@ class ReportsResource extends Resource
                 BulkAction::make('delete')
                     ->requiresConfirmation()
                     ->action(fn (Collection $records) => $records->each->delete())
-                ]);
+            ]);
     }
 
     protected static function getFilteredQuery(): Builder

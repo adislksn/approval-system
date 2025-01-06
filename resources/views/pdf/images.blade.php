@@ -119,13 +119,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td style="width: 30%;">Estimasi Biaya</td>
-                    <td style="width: 5%;">:</td>
-                    <td style="width: 65%;">
-                        {{ $datas['data']['estimation_cost'] ?? '' }}
-                    </td>
-                </tr>
-                <tr>
                     <td style="width: 30%;">Deskripsi Kerusakan</td>
                     <td style="width: 5%;">:</td>
                     <td></td>
@@ -164,11 +157,11 @@
             </p>
             <table style="width: 100%; margin-top: 20px;">
                 <tr>
-                    <td style="place-items: center;">
-                        <img src="{{ $datas['approval'][0]['ttd_path'] ?? '' }}" alt="image" width="100px" height="100px" style="object-fit: contain"/>
+                    <td style="place-items: center;" align="center">
+                        <img src="{{ $datas['approval'][0]['ttd_path'] ?? '' }}" alt="image" width="100px" height="100px" style="object-fit: contain;display: block; margin-left: auto; margin-right: auto;"/>
                     </td>
-                    <td style="place-items: center;">
-                        <img src="{{ $datas['approval'][1]['ttd_path'] ?? '' }}" alt="image" width="100px" height="100px" style="object-fit: contain"/>
+                    <td style="place-items: center;" align="center">
+                        <img src="{{ $datas['approval'][1]['ttd_path'] ?? '' }}" alt="image" width="100px" height="100px" style="object-fit: contain;display: block; margin-left: auto; margin-right: auto;"/>
                     </td>
                 </tr>
                 <tr>
@@ -198,7 +191,7 @@
             </p>
             <table style="width: 100%; margin-top: 20px;">
                 <tr>
-                    <td style="place-items: center;">
+                    <td style="place-items: center;" align="center">
                         <img src="{{ $datas['approval'][2]['ttd_path'] ?? '' }}" alt="image" width="100px" height="100px" style="object-fit: contain"/>
                     </td>
                 </tr>
@@ -233,8 +226,8 @@
                     @foreach($images as $index => $image)
                     <tr>
                         <td style="text-align: center;">{{ $index + 1 }}</td>
-                        <td style="place-items: center;padding: 10px;">
-                            <img src="{{ $image }}" alt="image" width="250px" height="250px" style="object-fit: contain"/>
+                        <td style="place-items: center;padding: 10px;" align="center">
+                            <img src="{{ $image }}" alt="image" width="250px" height="250px" style="object-fit: contain;display: block; margin-left: auto; margin-right: auto;"/>
                         </td>
                     </tr>
                     @endforeach

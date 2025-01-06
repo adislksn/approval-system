@@ -21,17 +21,17 @@ class UserSeeder extends Seeder
             ],
             [
                 'name' => 'Bayu Sudarmaji',
-                'email' => 'bayu.sudarmaji@gmail.com',
+                'email' => 'putrisamosir1121@gmail.com',
                 'password' => bcrypt('password'),
             ],
             [
                 'name' => 'Giri Fahmi',
-                'email' => 'giri.fahmi@gmail.com',
+                'email' => 'putri.120190038@student.itera.ac.id',
                 'password' => bcrypt('password'),
             ],
             [
                 'name' => 'Eric Bastian',
-                'email' => 'eric.bastian@gmail.com',
+                'email' => 'putrimasandriani.samosir@wingscorp.com',
                 'password' => bcrypt('password'),
             ],
         ];

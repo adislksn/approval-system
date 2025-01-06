@@ -28,14 +28,14 @@ class EditReports extends EditRecord
         $user = User::find($data['user_id']);
         $data['user_name'] = $user->name;
         $data['email'] = $user->email;
-    
+        
         return $data;
     }
-
-    protected function afterSave(): void
+    
+    protected function beforeSave(): void
     {
         // Get the status of the updated form (assuming 'status' is part of the form)
         $data = $this->record;
-        $user = User::find($data['user_id']);
+        $data['status'] = 'pending';
     }
 }

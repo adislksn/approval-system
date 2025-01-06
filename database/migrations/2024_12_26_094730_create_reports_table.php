@@ -22,7 +22,6 @@ return new class extends Migration
             $table->float('kilometer')->nullable();
             $table->json('description_service')->nullable();
             $table->text('service_location')->nullable();
-            $table->integer('estimation_cost')->nullable();
             $table->json('images')->nullable();
             $table->enum('status', ['pending', 'accepted 1', 'accepted 2', 'done', 'rejected'])->default('pending');
             $table->timestamps();

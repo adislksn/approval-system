@@ -12,7 +12,7 @@ class ReportsOverview extends BaseWidget
     protected static ?string $pollingInterval = '10s';
     protected function getStats(): array
     {
-        if(Auth::user()->role == 'admin') {
+        if(Auth::user()->hasRole('super_admin')) {
             $reports = Report::all();
         } else {
             $reports = Report::where('user_id', Auth::id())->get();
@@ -21,11 +21,11 @@ class ReportsOverview extends BaseWidget
             Stat::make('Reports', $reports->count())
             ->url(route('filament.access.resources.reports.create')),
             Stat::make('Pending', $reports->where('status', 'pending')->count())
-            ->url(route('filament.access.resources.reports.index', ['filter' => 'status:pending'])),
+            ->url(route('filament.access.resources.reports.index', ['tableFilters[status][value]' => 'pending'])),
             Stat::make('Rejected', $reports->where('status', 'rejected')->count())
-            ->url(route('filament.access.resources.reports.index', ['filter' => 'status:rejected'])),
-            Stat::make('Accepted', $reports->where('status', 'accepted')->count())
-            ->url(route('filament.access.resources.reports.index', ['filter' => 'status:accepted'])),
+            ->url(route('filament.access.resources.reports.index', ['tableFilters[status][value]' => 'rejected'])),
+            Stat::make('Accepted', $reports->where('status', 'done')->count())
+            ->url(route('filament.access.resources.reports.index', ['tableFilters[status][value]' => 'done'])),
         ];
     }
 }
