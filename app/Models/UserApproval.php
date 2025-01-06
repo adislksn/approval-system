@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserApproval extends Model
 {
+    protected $table = 'user_approvals';
     protected $fillable = [
         'user_id',
         'ttd_path',

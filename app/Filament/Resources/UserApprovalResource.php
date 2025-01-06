@@ -33,6 +33,7 @@ class UserApprovalResource extends Resource
                     ->relationship('user', 'name'),
                 FileUpload::make('ttd_path')
                     ->image()
+                    ->required()
                     ->imageEditor(),
             ]);
     }

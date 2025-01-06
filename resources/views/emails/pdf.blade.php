@@ -48,7 +48,7 @@
             Yth.
         </h3>
         <p class="text-formatter" style="margin: 0;">
-            Vendor Bersangkutan
+            Vendor {{ $name ?? '' }}
         </p>
         <p class="text-formatter" style="margin-top: 20px;">
             Saya memberikan approval kepada pihak bersangkutan untuk melakukan service kendaraan dengan deskripsi sebagai berikut:
@@ -58,49 +58,49 @@
                 <td style="width: 30%;">Nama Vendor</td>
                 <td style="width: 5%;">:</td>
                 <td style="width: 65%;">
-                    {{ $name }}
+                    {{ $name ?? '' }}
                 </td>
             </tr>
             <tr>
                 <td style="width: 30%;">No. Polisi</td>
                 <td style="width: 5%;">:</td>
                 <td style="width: 65%;">
-                    {{ $data['nopol']}}
+                    {{ $data['nopol']?? '' }}
                 </td>
             </tr>
             <tr>
-                <td style="width: 30%;">Jenis Kendaraan</td>
+                <td style="width: 30%;">Merk Kendaraan</td>
                 <td style="width: 5%;">:</td>
                 <td style="width: 65%;">
-                    ?
+                    {{ $data['merk'] ?? '' }}
                 </td>
             </tr>
             <tr>
                 <td style="width: 30%;">Tahun Kendaraan</td>
                 <td style="width: 5%;">:</td>
                 <td style="width: 65%;">
-                    {{ $data['tahun'] }}
+                    {{ $data['tahun'] ?? '' }}
                 </td>
             </tr>
             <tr>
                 <td style="width: 30%;">Shipping Type</td>
                 <td style="width: 5%;">:</td>
                 <td style="width: 65%;">
-                    {{ $data['shipping_type'] }}
+                    {{ $data['shipping_type'] ?? '' }}
                 </td>
             </tr>
             <tr>
                 <td style="width: 30%;">Kilometer</td>
                 <td style="width: 5%;">:</td>
                 <td style="width: 65%;">
-                    {{ $data['kilometer'] }}
+                    {{ $data['kilometer'] ?? '' }}
                 </td>
             </tr>
             <tr>
                 <td style="width: 30%;">Estimasi Biaya</td>
                 <td style="width: 5%;">:</td>
                 <td style="width: 65%;">
-                    {{ $data['estimation_cost'] }}
+                    {{ $data['estimation_cost'] ?? '' }}
                 </td>
             </tr>
         </table>

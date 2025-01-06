@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Resources\ReportsResource\Widgets\ReportsOverview;
+use App\Models\User;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use DutchCodingCompany\FilamentSocialite\FilamentSocialitePlugin;
 use Laravel\Socialite\Contracts\User as SocialiteUserContract;
@@ -22,6 +23,7 @@ use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use MarcoGermani87\FilamentCaptcha\FilamentCaptcha;
 
@@ -82,10 +84,24 @@ class AccessPanelProvider extends PanelProvider
                             ->with(['...']),
                     ])
                     ->createUserUsing(function (string $provider, SocialiteUserContract $oauthUser, FilamentSocialitePlugin $plugin) {
-                        dd($provider, $oauthUser, $plugin);
+                        // dd($provider, $oauthUser, $plugin);
+
+                        $authUser = User::UpdateOrCreate(
+                            ['email' => $oauthUser->getEmail()],
+                            [
+                                'name' => $oauthUser->getName(),
+                                'email' => $oauthUser->getEmail(),
+                                'password' => bcrypt($oauthUser->getId()),
+                            ]
+                        );
+                        Auth::attempt(['email' => $oauthUser->getEmail(), 'password' => $oauthUser->getId()]);
+                        return redirect()->route('filament.access.pages.dashboard');
                     })
                     ->resolveUserUsing(function (string $provider, SocialiteUserContract $oauthUser, FilamentSocialitePlugin $plugin) {
-                        dd($provider, $oauthUser, $plugin);
+                        // dd($provider, $oauthUser, $plugin);
+
+                        Auth::attempt(['email' => $oauthUser->getEmail(), 'password' => $oauthUser->getId()]);
+                        return redirect()->route('filament.access.pages.dashboard');
                     })
                     ->slug('access')
                     ->registration(true)

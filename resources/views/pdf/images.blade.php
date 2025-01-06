@@ -70,7 +70,7 @@
                 Yth.
             </h3>
             <p class="text-formatter" style="margin: 0;">
-                Vendor Bersangkutan
+                Vendor {{ $datas['name'] ?? '' }}
             </p>
             <p class="text-formatter" style="margin-top: 20px;">
                 Saya memberikan approval kepada pihak bersangkutan untuk melakukan service kendaraan dengan deskripsi sebagai berikut:
@@ -80,49 +80,49 @@
                     <td style="width: 30%;">Nama Vendor</td>
                     <td style="width: 5%;">:</td>
                     <td style="width: 65%;">
-                        {{ $datas['name'] }}
+                        {{ $datas['name'] ?? '' }}
                     </td>
                 </tr>
                 <tr>
                     <td style="width: 30%;">No. Polisi</td>
                     <td style="width: 5%;">:</td>
                     <td style="width: 65%;">
-                        {{ $datas['data']['nopol']}}
+                        {{ $datas['data']['nopol']?? '' }}
                     </td>
                 </tr>
                 <tr>
-                    <td style="width: 30%;">Jenis Kendaraan</td>
+                    <td style="width: 30%;">Merk Kendaraan</td>
                     <td style="width: 5%;">:</td>
                     <td style="width: 65%;">
-                        ?
+                        {{ $datas['data']['merk'] ?? '' }}
                     </td>
                 </tr>
                 <tr>
                     <td style="width: 30%;">Tahun Kendaraan</td>
                     <td style="width: 5%;">:</td>
                     <td style="width: 65%;">
-                        {{ $datas['data']['tahun'] }}
+                        {{ $datas['data']['tahun'] ?? '' }}
                     </td>
                 </tr>
                 <tr>
                     <td style="width: 30%;">Shipping Type</td>
                     <td style="width: 5%;">:</td>
                     <td style="width: 65%;">
-                        {{ $datas['data']['shipping_type'] }}
+                        {{ $datas['data']['shipping_type'] ?? '' }}
                     </td>
                 </tr>
                 <tr>
                     <td style="width: 30%;">Kilometer</td>
                     <td style="width: 5%;">:</td>
                     <td style="width: 65%;">
-                        {{ $datas['data']['kilometer'] }}
+                        {{ $datas['data']['kilometer'] ?? '' }}
                     </td>
                 </tr>
                 <tr>
                     <td style="width: 30%;">Estimasi Biaya</td>
                     <td style="width: 5%;">:</td>
                     <td style="width: 65%;">
-                        {{ $datas['data']['estimation_cost'] }}
+                        {{ $datas['data']['estimation_cost'] ?? '' }}
                     </td>
                 </tr>
                 <tr>
@@ -142,14 +142,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($datas['data']['description_service'] as $index => $description)
-                        <tr>
-                            <td style="border: 1px solid black;text-align: center">{{ $index + 1 }}</td>
-                            <td style="border: 1px solid black;">
-                                {{ $description['description'] }}
-                            </td>
-                        </tr>
-                    @endforeach
+                    @isset($datas['data']['description_service'])
+                        @foreach($datas['data']['description_service'] as $index => $description)
+                            <tr>
+                                <td style="border: 1px solid black;text-align: center">{{ $index + 1 }}</td>
+                                <td style="border: 1px solid black;">
+                                    {{ $description['description'] ?? '' }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    @endisset
                 </tbody>
             </table>
         </section>
@@ -160,40 +162,57 @@
             <p class="text-formatter" style="margin-top: 20px;text-align: center;">
                 Mengetahui,
             </p>
-            <div style="margin-top: 100px;">
-                <div style="width: 50%;float: left;text-align: center;">
-                    <p class="text-formatter" style="margin: 0;font-weight: bold;">
-                        Bayu Sudarmaji
-                    </p>
-                    <p class="text-formatter" style="margin: 0;font-weight: bold;">
-                        Kepala Transport DC Marunda
-                    </p>
-                </div>
-                <div style="width: 50%;float: right;text-align: center;font-weight: bold;">
-                    <p class="text-formatter" style="margin: 0;font-weight: bold;">
-                        Giri Fahmi
-                    </p>
-                    <p class="text-formatter" style="margin: 0;font-weight: bold;">
-                        Kepala Logistik DC Marunda
-                    </p>
-                </div>
-            </div>
+            <table style="width: 100%; margin-top: 20px;">
+                <tr>
+                    <td style="place-items: center;">
+                        <img src="{{ $datas['approval'][0]['ttd_path'] ?? '' }}" alt="image" width="100px" height="100px" style="object-fit: contain"/>
+                    </td>
+                    <td style="place-items: center;">
+                        <img src="{{ $datas['approval'][1]['ttd_path'] ?? '' }}" alt="image" width="100px" height="100px" style="object-fit: contain"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="width: 50%; text-align: center;">
+                        <p class="text-formatter" style="margin: 0;font-weight: bold;">
+                            {{ $datas['approval'][0]['user']['name'] ?? '' }}
+                        </p>
+                        <p class="text-formatter" style="margin: 0;font-weight: bold;">
+                            Kepala Transport DC Marunda
+                        </p>
+                    </td>
+                    <td style="width: 50%; text-align: center;">
+                        <p class="text-formatter" style="margin: 0;font-weight: bold;">
+                            {{ $datas['approval'][1]['user']['name'] ?? '' }}
+                        </p>
+                        <p class="text-formatter" style="margin: 0;font-weight: bold;">
+                            Kepala Logistik DC Marunda
+                        </p>
+                    </td>
+                </tr>
+            </table>
         </section>
-    
+        
         <section style="padding-top: 50px;">
             <p class="text-formatter" style="text-align: center;">
-                Menyetujui,
+            Menyetujui,
             </p>
-            <div style="margin-top: 100px;">
-                <div style="width: 100%;text-align: center;">
-                    <p class="text-formatter" style="margin: 0;font-weight: bold;">
-                        Eric Bastian
-                    </p>
-                    <p class="text-formatter" style="margin: 0;font-weight: bold;">
-                        DC Marunda
-                    </p>
-                </div>
-            </div>
+            <table style="width: 100%; margin-top: 20px;">
+                <tr>
+                    <td style="place-items: center;">
+                        <img src="{{ $datas['approval'][2]['ttd_path'] ?? '' }}" alt="image" width="100px" height="100px" style="object-fit: contain"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align: center;">
+                        <p class="text-formatter" style="margin: 0;font-weight: bold;">
+                            {{ $datas['approval'][2]['user']['name'] ?? '' }}
+                        </p>
+                        <p class="text-formatter" style="margin: 0;font-weight: bold;">
+                            DC Marunda
+                        </p>
+                    </td>
+                </tr>
+            </table>
         </section>
     </div>
 
@@ -210,14 +229,16 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($images as $index => $image)
+                @isset($images)
+                    @foreach($images as $index => $image)
                     <tr>
-                        <td style="text-align: center">{{ $index + 1 }}</td>
-                        <td style="text-align: center">
+                        <td style="text-align: center;">{{ $index + 1 }}</td>
+                        <td style="place-items: center;padding: 10px;">
                             <img src="{{ $image }}" alt="image" width="250px" height="250px" style="object-fit: contain"/>
                         </td>
                     </tr>
-                @endforeach
+                    @endforeach
+                @endisset
             </tbody>
         </table>
     </div>

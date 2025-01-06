@@ -1,17 +1,19 @@
 <?php
 namespace App\Helpers;
 
+use App\Models\UserApproval;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class MailHelpers
 {
-    public static function sendPDF(array $images, $user, array $dataItem)
+    public static function sendPDF(array $tempImages, $user, array $dataItem)
     {
 
-        if($images){
-            foreach ($images as $image) {
+        $images = [];
+        if($tempImages){
+            foreach ($tempImages as $image) {
                 $path = env('APP_URL').'/storage/'.$image; // Get the file path
                 $type = pathinfo($path, PATHINFO_EXTENSION);
                 $data = file_get_contents($path); // Read the file contents
@@ -20,10 +22,27 @@ class MailHelpers
             }
         }
 
+        $tempApproval = UserApproval::with('user')->get();
+        foreach ($tempApproval as $imageAppr) {
+            $ttd_path = $imageAppr['ttd_path'];
+            $pathTemp = env('APP_URL').'/storage/'. $ttd_path; // Get the file path
+            $type = pathinfo($pathTemp, PATHINFO_EXTENSION);
+            $dataApprov = file_get_contents($pathTemp); // Read the file contents
+            $base64 = 'data:image/' . $type . ';base64,' . base64_encode($dataApprov);
+            $approval[] = $base64; // Store Base64-encoded image
+        }
+
+        // change the ttd_path to base64 in $tempApproval
+        $tempApproval = $tempApproval->toArray();
+        foreach ($tempApproval as $key => $value) {
+            $tempApproval[$key]['ttd_path'] = $approval[$key];
+        }
+
         $datas = [
             'name' => $user->name,
             'email' => $user->email,
             'data' => $dataItem,
+            'approval' => $tempApproval
         ];
         
         // Generate the PDF with the images
