@@ -18,7 +18,10 @@ Route::get('/', function () {
 //     $images_temp = Report::first()->images;
 //     $tempApproval = UserApproval::with('user')->get();
 //     foreach ($images_temp as $image) {
-//         $path = env('APP_URL').'/storage/'.$image; // Get the file path
+//         $path = public_path('storage/' . $image);
+//         if (!file_exists($path)) {
+//             continue;
+//         }
 //         $type = pathinfo($path, PATHINFO_EXTENSION);
 //         $data = file_get_contents($path); // Read the file contents
 //         $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
@@ -27,7 +30,10 @@ Route::get('/', function () {
 
 //     foreach ($tempApproval as $imageAppr) {
 //         $ttd_path = $imageAppr['ttd_path'];
-//         $pathTemp = env('APP_URL').'/storage/'. $ttd_path; // Get the file path
+//         $pathTemp = public_path('storage/' . $ttd_path);
+//         if (!file_exists($pathTemp)) {
+//             continue;
+//         }
 //         $type = pathinfo($pathTemp, PATHINFO_EXTENSION);
 //         $dataApprov = file_get_contents($pathTemp); // Read the file contents
 //         $base64 = 'data:image/' . $type . ';base64,' . base64_encode($dataApprov);
@@ -36,6 +42,9 @@ Route::get('/', function () {
     
 //     // change the ttd_path to base64 in $tempApproval
 //     $tempApproval = $tempApproval->toArray();
+//     if (!isset($approval)) {
+//         $approval = [];
+//     }
 //     foreach ($tempApproval as $key => $value) {
 //         $tempApproval[$key]['ttd_path'] = $approval[$key];
 //     }

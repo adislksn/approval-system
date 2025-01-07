@@ -14,7 +14,10 @@ class MailHelpers
         $images = [];
         if($tempImages){
             foreach ($tempImages as $image) {
-                $path = env('APP_URL').'/storage/'.$image; // Get the file path
+                $path = storage_path('app/public/' . $image);
+                if (!file_exists($path)) {
+                    continue;
+                }
                 $type = pathinfo($path, PATHINFO_EXTENSION);
                 $data = file_get_contents($path); // Read the file contents
                 $base64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
@@ -24,8 +27,10 @@ class MailHelpers
 
         $tempApproval = UserApproval::with('user')->get();
         foreach ($tempApproval as $imageAppr) {
-            $ttd_path = $imageAppr['ttd_path'];
-            $pathTemp = env('APP_URL').'/storage/'. $ttd_path; // Get the file path
+            $pathTemp = storage_path('app/public/' . $imageAppr['ttd_path']);
+            if (!file_exists($pathTemp)) {
+                continue;
+            }
             $type = pathinfo($pathTemp, PATHINFO_EXTENSION);
             $dataApprov = file_get_contents($pathTemp); // Read the file contents
             $base64 = 'data:image/' . $type . ';base64,' . base64_encode($dataApprov);
@@ -34,6 +39,9 @@ class MailHelpers
 
         // change the ttd_path to base64 in $tempApproval
         $tempApproval = $tempApproval->toArray();
+        if (!isset($approval)) {
+            $approval = [];
+        }
         foreach ($tempApproval as $key => $value) {
             $tempApproval[$key]['ttd_path'] = $approval[$key];
         }
