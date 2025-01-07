@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReportsResource\Pages;
 use App\Filament\Resources\ReportsResource\RelationManagers;
+use App\Helpers\MailHelpers;
 use App\Jobs\MailerJob;
 use App\Models\Report;
 use App\Models\User;
@@ -205,8 +206,8 @@ class ReportsResource extends Resource
                     ->afterStateUpdated(function ($record, $state) {
                         if ($state === 'done') {
                             $user = User::find($record->user_id);
-                            // MailHelpers::sendPDF($record->images, $user, $record->toArray());
-                            MailerJob::dispatch($record->images, $user, $record->toArray());
+                            MailHelpers::sendPDF($record->images, $user, $record->toArray());
+                            // MailerJob::dispatch($record->images, $user, $record->toArray());
                         }
                     })
                     ->selectablePlaceholder(false)
