@@ -206,8 +206,8 @@ class ReportsResource extends Resource
                     ->afterStateUpdated(function ($record, $state) {
                         if ($state === 'done') {
                             $user = User::find($record->user_id);
-                            MailHelpers::sendPDF($record->images, $user, $record->toArray());
-                            // MailerJob::dispatch($record->images, $user, $record->toArray());
+                            // MailHelpers::sendPDF($record->images, $user, $record->toArray());
+                            MailerJob::dispatch($record->images, $user, $record->toArray());
                         }
                     })
                     ->selectablePlaceholder(false)
