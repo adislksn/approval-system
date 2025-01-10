@@ -12,7 +12,7 @@ class ReportsOverview extends BaseWidget
     protected static ?string $pollingInterval = '10s';
     protected function getStats(): array
     {
-        if(Auth::user()->hasRole('super_admin')) {
+        if(Auth::user()->can('update_reports')) {
             $reports = Report::all();
         } else {
             $reports = Report::where('user_id', Auth::id())->get();

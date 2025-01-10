@@ -148,6 +148,9 @@
                 </tbody>
             </table>
         </section>
+    </div>
+    
+    <div class="container">
         <section style="margin-top: 50px;">
             <p class="text-formatter" style="margin: 0;">
                 Demikian surat perizinan ini disampaikan, kiranya service kendaraan dapat segera dilaksanakan agar kegiatan operasional dapat berlangsung dengan baik kembali.
